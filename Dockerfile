@@ -1,11 +1,11 @@
-FROM python:3.8.2
-ENV HOME /root
-WORKDIR /root
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 8000
+# Following the example of https://shipyard.build/blog/first-flask-docker-compose-app/ -JG
+FROM python:3.9.10-alpine3.14
+WORKDIR /srv
+RUN pip install --upgrade pip
+RUN pip install flask
+COPY . /srv
+ENV FLASK_APP=app
+
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
 RUN chmod +x /wait
-ENTRYPOINT [ "python" ]
-CMD /wait && appserver.py
+CMD /wait && python app.py
