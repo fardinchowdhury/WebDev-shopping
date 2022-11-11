@@ -4,48 +4,108 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>devpro Auction</title>
-  <link href="{{ url_for('static', filename='home.css')}}" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <title>UpBid</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <link href="signup.css" rel="stylesheet" type="text/css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
   <header>
+    <img class="logo" src="images/logo.png" alt="logo">
+
+          
+    <form class="searchbar" action="#">
+      <input type="text" placeholder="Search Anything..." name="search2">
+      <button type="submit"><i class="fa fa-search"></i></button>
+    </form>
+        
     <nav>
-      <div class="logo">
-        <a href="#" ><img src="images/logo.png" alt="logo"></a>
-      </div>
-      <ul class="nav-links">
-        <li>
-          <a href="#">Home</a>
-        </li>
-        <li>
-          <a href="#">About</a>
-        </li>
-        <li>
-          <a href="#">Login</a>
-        </li>
-        <li>
-          <a href="#"><button class="button button1"> Sign Up</button></a>
-        </li>
+      <ul class="nav_links">
+        <li><a href="#"> About </a></li>
+        <li><a href="#"> Projects </a></li>
+        <li><a href="#"> Login </a></li>
       </ul>
-
     </nav>
+    <a class="cta" href="#"><button class="btn1">Signup</button></a>
   </header>
-  <section>
-      <form action="" class="search-bar">
-        <input type="text" placeholder="Search anything" name="q">
-        <button type="submit"><img src="images/search.jpg"></button>
-      </form>
-    
-     <div class="curve"></div>
-  </section>
+
+  <div class="section">
+    <h1> Bid for your life</h1>
+  </div>
+
+
+
+
+<!-- Sign up and login  design inspired by https://codepen.io/pradeeptomar21/pen/zYvVyaB-->
   
+<section class="user">
+  <div class="user_options-container">
+    <div class="user_options-text">
+      <div class="user_options-unregistered">
+        <h2 class="user_unregistered-title">Don't have an account?</h2>
+        <p class="user_unregistered-text">Banjo tote bag bicycle rights, High Life sartorial cray craft beer whatever street art fap.</p>
+        <button class="user_unregistered-signup" id="signup-button">Sign up</button>
+      </div>
+
+      <div class="user_options-registered">
+        <h2 class="user_registered-title">Have an account?</h2>
+        <p class="user_registered-text">Banjo tote bag bicycle rights, High Life sartorial cray craft beer whatever street art fap.</p>
+        <button class="user_registered-login" id="login-button">Login</button>
+      </div>
+    </div>
+    
+    <div class="user_options-forms" id="user_options-forms">
+      <div class="user_forms-login">
+        <h2 class="forms_title">Login</h2>
+        <form class="forms_form">
+          <fieldset class="forms_fieldset">
+            <div class="forms_field">
+              <input type="email" placeholder="Email" class="forms_field-input" required autofocus />
+            </div>
+            <div class="forms_field">
+              <input type="password" placeholder="Password" class="forms_field-input" required />
+            </div>
+          </fieldset>
+          <div class="forms_buttons">
+            <button type="button" class="forms_buttons-forgot">Forgot password?</button>
+            <input type="submit" value="Log In" class="forms_buttons-action">
+          </div>
+        </form>
+      </div>
+      <div class="user_forms-signup">
+        <h2 class="forms_title">Sign Up</h2>
+        <form class="forms_form">
+          <fieldset class="forms_fieldset">
+            <div class="forms_field">
+              <input type="text" placeholder="Full Name" class="forms_field-input" required />
+            </div>
+            <div class="forms_field">
+              <input type="email" placeholder="Email" class="forms_field-input" required />
+            </div>
+            <div class="forms_field">
+              <input type="password" placeholder="Password" class="forms_field-input" required />
+            </div>
+          </fieldset>
+          <div class="forms_buttons">
+            <input type="submit" value="Sign up" class="forms_buttons-action">
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
 
 
+
+
+
+  
+  
   <script src="script.js"></script>
-
-
 </body>
 
 </html>
