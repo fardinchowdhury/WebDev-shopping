@@ -4,6 +4,7 @@ WORKDIR /srv
 RUN pip install --upgrade pip
 RUN pip install flask
 COPY . /srv
+RUN pip install -r requirements.txt
 ENV FLASK_APP=app
 
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait

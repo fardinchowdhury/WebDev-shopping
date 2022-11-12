@@ -61,13 +61,13 @@
     <div class="user_options-forms" id="user_options-forms">
       <div class="user_forms-login">
         <h2 class="forms_title">Login</h2>
-        <form class="forms_form" id="login_form">
+        <form class="forms_form" id="login_form" methd="post" action="/login">
           <fieldset class="forms_fieldset">
             <div class="forms_field">
-              <input type="email" placeholder="Email" id="login_email" class="forms_field-input" required autofocus />
+              <input type="email" placeholder="Email" name="login_email" class="forms_field-input" required autofocus />
             </div>
             <div class="forms_field">
-              <input type="password" placeholder="Password" id="login_password" class="forms_field-input" required />
+              <input type="password" placeholder="Password" name="login_password" class="forms_field-input" required />
             </div>
           </fieldset>
           <div class="forms_buttons">
@@ -78,16 +78,16 @@
       </div>
       <div class="user_forms-signup">
         <h2 class="forms_title">Sign Up</h2>
-        <form class="forms_form" id="signup_form">
+        <form class="forms_form" id="signup_form" methd="post" action="/signup">
           <fieldset class="forms_fieldset">
             <div class="forms_field">
-              <input type="text" placeholder="Full Name" id="register_username" class="forms_field-input" required />
+              <input type="text" placeholder="Full Name" name="register_username" class="forms_field-input" required />
             </div>
             <div class="forms_field">
-              <input type="email" placeholder="Email" id="register_email" class="forms_field-input" required />
+              <input type="email" placeholder="Email" name="register_email" class="forms_field-input" required />
             </div>
             <div class="forms_field">
-              <input type="password" placeholder="Password" id="register_password" class="forms_field-input" required />
+              <input type="password" placeholder="Password" name="register_password" class="forms_field-input" required />
             </div>
           </fieldset>
           <div class="forms_buttons">

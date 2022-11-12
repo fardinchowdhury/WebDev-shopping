@@ -20,3 +20,7 @@ loginButton.addEventListener('click', () => {
 userForms.classList.remove('bounceLeft')
 userForms.classList.add('bounceRight')
 }, false)
+
+// Event listener and input validation for the signup form
+
+
