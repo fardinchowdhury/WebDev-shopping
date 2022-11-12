@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>UpBid</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
-  <link href="signup.css" rel="stylesheet" type="text/css" />
+  <link href="../static/style.css" rel="stylesheet" type="text/css" />
+  <link href="../static/signup.css" rel="stylesheet" type="text/css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
 
 <body>
   <header>
-    <img class="logo" src="images/logo.png" alt="logo">
+    <img class="logo" src="static/logo.png" alt="logo">
 
           
     <form class="searchbar" action="#">
@@ -61,13 +61,13 @@
     <div class="user_options-forms" id="user_options-forms">
       <div class="user_forms-login">
         <h2 class="forms_title">Login</h2>
-        <form class="forms_form">
+        <form class="forms_form" id="login_form">
           <fieldset class="forms_fieldset">
             <div class="forms_field">
-              <input type="email" placeholder="Email" class="forms_field-input" required autofocus />
+              <input type="email" placeholder="Email" id="login_email" class="forms_field-input" required autofocus />
             </div>
             <div class="forms_field">
-              <input type="password" placeholder="Password" class="forms_field-input" required />
+              <input type="password" placeholder="Password" id="login_password" class="forms_field-input" required />
             </div>
           </fieldset>
           <div class="forms_buttons">
@@ -78,16 +78,16 @@
       </div>
       <div class="user_forms-signup">
         <h2 class="forms_title">Sign Up</h2>
-        <form class="forms_form">
+        <form class="forms_form" id="signup_form">
           <fieldset class="forms_fieldset">
             <div class="forms_field">
-              <input type="text" placeholder="Full Name" class="forms_field-input" required />
+              <input type="text" placeholder="Full Name" id="register_username" class="forms_field-input" required />
             </div>
             <div class="forms_field">
-              <input type="email" placeholder="Email" class="forms_field-input" required />
+              <input type="email" placeholder="Email" id="register_email" class="forms_field-input" required />
             </div>
             <div class="forms_field">
-              <input type="password" placeholder="Password" class="forms_field-input" required />
+              <input type="password" placeholder="Password" id="register_password" class="forms_field-input" required />
             </div>
           </fieldset>
           <div class="forms_buttons">
@@ -105,7 +105,7 @@
 
   
   
-  <script src="script.js"></script>
+  <script src="../static/script.js"></script>
 </body>
 
 </html>
