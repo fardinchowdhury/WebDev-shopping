@@ -3,9 +3,11 @@ import bcrypt
 
 
 # Checks if a user is already in our database. Returns false if not, true if he is
-def check_for_user(username: str, user_database):
-    hits = user_database.find_one({"user": username})
-    if hits is None:
+def check_for_user(username: str, email: str, user_database):
+    hits1 = user_database.find_one({"user": username})
+    hits2 = user_database.find_one({"email": email})
+
+    if hits1 is None and hits2 is None:
         return False
     else:
         return True

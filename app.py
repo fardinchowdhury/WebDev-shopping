@@ -1,9 +1,15 @@
-from flask import Flask, render_template, url_for, request, flash
+import secrets
 import pymongo
 import bcrypt
 from helper_functions import *
+from flask import Flask, render_template, url_for, request, flash, redirect, make_response
+
+
+
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = int.to_bytes(3, secrets.randbits(24), byteorder="big")
+
 # Database pointers
 mongo_client = pymongo.MongoClient('mongo')
 database = mongo_client["Site_Info"]
@@ -16,17 +22,48 @@ transaction_records = database["transactions"]  # Holds a record of all previous
 def home():
     return render_template('home.html', error=None)
 
-@app.route('/signup', methods=["POST"])
+
+@app.route('/signup', methods=["POST"]) # Handles sign-in requests
 def signup():
     username = request.form.get("register_username")
     password = request.form.get("register_password")
-    # Checking if the user exists already; if false, we continue with registration
-    if not check_for_user(username, user_table):
+    email = request.form.get("register_email")
+    # Checking if the user exists already; if false, we continue with registration. Otherwise, flash an error message
+    if not check_for_user(username, email, user_table):
+        print("Creating user!", flush=True)
+        hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+        user_table.insert_one({"user": username, "email": email, "pass": hashed_password})
         return render_template('home.html')
     else:
-        flash("Username already in use!")
-        return render_template('home.html')
+        flash("Email or username already in use!")
+        return redirect("/", 302, None)
+
+@app.route('/signup', methods=["POST"]) # Login handler
+def login():
+    email = request.form.get("login_email")
+    password = request.form.get("login_password")
+    # Checking if the user is actually registered to us
+    user = user_table.find_one({"email": email})
+    if user is None:
+        flash("Invalid credentials!")
+        return redirect("/", 302, None)
+    else:
+        # Then we authenticate their password
+        hashed = user["pass"]
+        if bcrypt.checkpw(password.encode(),hashed):
+            auth_token = secrets.token_urlsafe()
+            hashed_token = bcrypt.hashpw(auth_token.encode(), bcrypt.gensalt(1))
+            user_table.update_one({"email": email}, {"$set": {"token": hashed_token}})
+            response = make_response(render_template()) # FILL THIS IN
+            response.set_cookie('auth_token', value=auth_token, httponly=True)
+            return response
+
+        else:
+            flash("Invalid credentials!")
+            return redirect("/", 302, None)
+
 
 
 if __name__ == "__main__":
+
     app.run(debug=True, host='0.0.0.0')

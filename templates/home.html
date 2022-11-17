@@ -11,13 +11,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 </head>
 
 <body>
+
   <header>
     <img class="logo" src="static/logo.png" alt="logo">
-
-          
     <form class="searchbar" action="#">
       <input type="text" placeholder="Search Anything..." name="search2">
       <button type="submit"><i class="fa fa-search"></i></button>
@@ -57,11 +57,19 @@
         <button class="user_registered-login" id="login-button">Login</button>
       </div>
     </div>
-    
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <script>alert("{{ message }}");</script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <div class="user_options-forms" id="user_options-forms">
       <div class="user_forms-login">
         <h2 class="forms_title">Login</h2>
-        <form class="forms_form" id="login_form" methd="post" action="/login">
+        <form class="forms_form" id="login_form" method="post" action="/login">
           <fieldset class="forms_fieldset">
             <div class="forms_field">
               <input type="email" placeholder="Email" name="login_email" class="forms_field-input" required autofocus />
@@ -78,7 +86,7 @@
       </div>
       <div class="user_forms-signup">
         <h2 class="forms_title">Sign Up</h2>
-        <form class="forms_form" id="signup_form" methd="post" action="/signup">
+        <form class="forms_form" id="signup_form" method="post" action="/signup">
           <fieldset class="forms_fieldset">
             <div class="forms_field">
               <input type="text" placeholder="Full Name" name="register_username" class="forms_field-input" required />
