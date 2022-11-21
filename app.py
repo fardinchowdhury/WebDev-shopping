@@ -54,13 +54,25 @@ def login():
             auth_token = secrets.token_urlsafe()
             hashed_token = bcrypt.hashpw(auth_token.encode(), bcrypt.gensalt(1))
             user_table.update_one({"email": email}, {"$set": {"token": hashed_token}})
-            response = make_response(render_template()) # FILL THIS IN
-            response.set_cookie('auth_token', value=auth_token, httponly=True)
+            response = make_response(render_template()) # FILL THIS OUT TO LEAD TO THE FIRST PAGE
+            response.set_cookie('auth_token', value=auth_token, httponly=True, max_age=604800)
+            response.set_cookie('email', value=email, httponly=True, max_age=604800)
             return response
 
         else:
             flash("Invalid credentials!")
             return redirect("/", 302, None)
+
+@app.route('/logout', methods=["POST"])
+def logout():
+    if get_logged_in(request, user_table):
+        # Help with deleting cookies from https://sparkdatabox.com/tutorials/python-flask/delete-cookies
+        response = make_response(render_template())  # FILL THIS OUT TO LEAD TO THE LOGIN PAGE
+        response.set_cookie('auth_token', value="", httponly=True, max_age=0)
+        response.set_cookie('email', value="", httponly=True, max_age=0)
+        return response
+    else:
+        return redirect("/", 302, None)
 
 
 
