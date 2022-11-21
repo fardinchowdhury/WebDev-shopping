@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Sign Up</title>
+{% endblock %}
+
+
+{% block body %}
+<div class = "content">
+        <h1 class = "center">Create an Acocount</h1>
+
+        <form action="/user/signup" id="sign-form" method="post" enctype="multipart/form-data">
+
+            <label for="name">Name</label>
+            <input type = "text" name="name" class="field" required>
+
+            <label for="email">Email</label>
+            <input type = "email" name="email" class="field" required>
+
+            <label for="password">Password</label>
+            <input type = "password" name="password" class="field" required>
+
+            <p class="error error--hidden">
+                
+            </p>
+
+            <input type = "submit" value="Sign up" class="btn">
+        </form>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Hello world</title>
+{% endblock %}
+
+
+{% block body %}
+    <div class="content">
+        <h1 style ="text-align: center">Test itemaddingpage</h1>
+            <table>
+                <tr>
+                    <th>Current User</th>
+                    <th>Seller</th>
+                    <th>Itemname</th>
+                    <th>Image</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                </tr>
+                <tr>
+                    <form action="/item-upload" id="item-form" method="post" enctype="multipart/form-data">
+                        <td>  <input type = "text" name ="username"> </td> 
+                        <td>  <input type = "text" name ="seller"> </td> 
+                        <td>  <input type ="text" name = "itemname"> </td>
+                        <td>  <input id="form-file" type="file" name="upload_image"> </td>
+                        <td>  <input type = "text" name ="description"> </td>
+                        <td>  <input type = "text" name ="price"> </td>
+                        <td>  <input type="submit" value="Post"> </td>
+                    </form>
+                </tr>
+
+            </table>
+            
+
+        
+            
+            <!-- <form action="/item-update" id= "update-form" method="post" enctype="multipart/form-data">
+                <label for="form-user">Which seller:</label>
+                <input type ="text" name = "seller">
+                <lbael for="form-item">Which item:</lbael>
+                <input type ="text" name = "itemname">
+                <input type = "submit" name="plus"  value="+">
+                <input type = "text" name ="number">
+                <input type = "submit" name="minus"value="-">
+            </form> -->
+            
+
+            <form action="/item-delete" id= "update-form" method="post" enctype="multipart/form-data">
+                <label for="form-user">Which seller:</label>
+                <input type ="text" name = "seller">
+                <lbael for="form-item">Which item:</lbael>
+                <input type ="text" name = "itemname">
+                <input type = "submit" value="Delete">
+            </form>
+
+
+   
+</div>
+{% endblock %}

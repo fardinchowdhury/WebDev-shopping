@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Sign Up</title>
+{% endblock %}
+
+
+{% block body %}
+<div class = "content">
+
+    <h1 style ="text-align: center">Test shoppingcart</h1>
+            {% for task in tasks%} 
+            <table>
+                <tr>
+                    <th>Seller</th>
+                    <th>Itemname</th>
+                    <th>Image</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                </tr>
+                <tr>
+                <form enctype="multipart/form-data">
+                    <td>{{ task.seller }}</td>
+                    <td>{{ task.Item_name }}</td>
+                    <td><img src = '/image/{{ task.profile_image_name }}' class = 'image' width="100" height="100"/></td>
+                    <td>{{ task.Description }}</td>
+                    <td>{{ task.Price }}</td>
+                </form>
+
+
+                <form action="/item-delete" id= "update-form" method="post" enctype="multipart/form-data">
+                    <label for="form-user">Which seller:</label>
+                    <input type ="text" name = "seller">
+                    <lbael for="form-item">Which item:</lbael>
+                    <input type ="text" name = "itemname">
+                    <input type = "submit" value="Delete">
+                </form>
+                
+                
+                </tr>
+            </table>
+            {% endfor %}
+            {{pic}}
+
+</div>
+{% endblock %}

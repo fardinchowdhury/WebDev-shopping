@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Sign Up</title>
+{% endblock %}
+
+
+{% block body %}
+<div class = "content">
+        <h1 class = "center">Login</h1>
+
+        <form action="/" id="log-form" method="post" enctype="multipart/form-data">
+            <label for="username">Email</label>
+            <input type = "text" name="username" class="field" required>
+
+            <label for="password">Password</label>
+            <input type = "password" name="password" class="field" required>
+
+            <p class="error error--hidden">     
+            </p>
+
+            <input type = "submit" value="Log in" class="btn">
+        </form>
+</div>
+{% endblock %}
