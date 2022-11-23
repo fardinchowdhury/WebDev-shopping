@@ -6,20 +6,21 @@
 
 
 {% block body %}
-<div class = "content">
-        <h1 class = "center">Login</h1>
-
-        <form action="/" id="log-form" method="post" enctype="multipart/form-data">
-            <label for="username">Email</label>
-            <input type = "text" name="username" class="field" required>
-
-            <label for="password">Password</label>
-            <input type = "password" name="password" class="field" required>
-
-            <p class="error error--hidden">     
-            </p>
-
-            <input type = "submit" value="Log in" class="btn">
+<div class="user_forms-login">
+        <h2 class="forms_title">Login</h2>
+        <form class="forms_form" id="login_form" method="post" action="/login">
+          <fieldset class="forms_fieldset">
+            <div class="forms_field">
+              <input type="email" placeholder="Email" name="login_email" class="forms_field-input" required autofocus />
+            </div>
+            <div class="forms_field">
+              <input type="password" placeholder="Password" name="login_password" class="forms_field-input" required />
+            </div>
+          </fieldset>
+          <div class="forms_buttons">
+            <button type="button" class="forms_buttons-forgot">Forgot password?</button>
+            <input type="submit" value="Log In" class="forms_buttons-action">
+          </div>
         </form>
-</div>
+      </div>
 {% endblock %}

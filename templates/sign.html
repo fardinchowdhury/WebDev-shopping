@@ -6,25 +6,30 @@
 
 
 {% block body %}
-<div class = "content">
-        <h1 class = "center">Create an Acocount</h1>
-
-        <form action="/user/signup" id="sign-form" method="post" enctype="multipart/form-data">
-
-            <label for="name">Name</label>
-            <input type = "text" name="name" class="field" required>
-
-            <label for="email">Email</label>
-            <input type = "email" name="email" class="field" required>
-
-            <label for="password">Password</label>
-            <input type = "password" name="password" class="field" required>
-
-            <p class="error error--hidden">
-                
-            </p>
-
-            <input type = "submit" value="Sign up" class="btn">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <script>alert("{{ message }}");</script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+<div class="user_forms-signup">
+        <h2 class="forms_title">Sign Up</h2>
+        <form class="forms_form" id="signup_form" method="post" action="/signup" >
+          <fieldset class="forms_fieldset">
+            <div class="forms_field">
+              <input type="text" placeholder="Full Name" name="register_username" class="forms_field-input" required />
+            </div>
+            <div class="forms_field">
+              <input type="email" placeholder="Email" name="register_email" class="forms_field-input" required />
+            </div>
+            <div class="forms_field">
+              <input type="password" placeholder="Password" name="register_password" class="forms_field-input" required />
+            </div>
+          </fieldset>
+          <div class="forms_buttons">
+            <input type="submit" value="Sign up" class="forms_buttons-action">
+          </div>
         </form>
-</div>
+      </div>
 {% endblock %}
