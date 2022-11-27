@@ -33,12 +33,12 @@ def check_password(username: str, password: str, user_database):
 
 # Simple code to get an ID for an item and then update the one on record
 def get_item_id(id_database):
-    id = id_database.find_one({})
-    if not id:
+    old_id = id_database.find_one({})
+    if not old_id:
         id_database.insert_one({"id": 1})
         return 1
     else:
-        next_id = int(id['id']) + 1
+        next_id = int(old_id['id']) + 1
         id_database.update_one({}, {'$set': {"id": next_id}})
         return next_id
 

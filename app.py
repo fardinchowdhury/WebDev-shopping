@@ -15,6 +15,7 @@ current_listings = database["listings"]  # Records for all current items listed 
 transaction_records = database["transactions"]  # Holds a record of all previous finished transactions
 item_ids = database["ids"]
 
+
 @app.route('/')  # Serving home page and associated content
 def home():
     if get_logged_in(request, user_table):
@@ -34,13 +35,15 @@ def add_item():
         current_xsrf = current_user["xsrf_tokens"]
 
         if item_xsrf == current_xsrf:
-
             name = request.form.get("item_name")
             description = request.form.get("item_description")
             price = request.form.get("item_price")
             image = request.form.get("item_image")
             new_id = get_item_id(item_ids)
-
+            current_listings.insert_one(
+                {"id": new_id, "seller": current_user["user"], "name": name, "description": description, "image": image,
+                 "price": price})
+            return redirect("/", 200, "OK")
 
         flash("Cross site request forgery detected!")
         return render_template('home.html', error=None)
@@ -51,21 +54,21 @@ def add_item():
 @app.route('/login_page')
 def login_page():
     if get_logged_in(request, user_table):
-        return redirect('/', 302, None)
+        return redirect('/', 400, "Bad Request")
     return render_template('log.html')
 
 
 @app.route('/signup_page')
 def signup_page():
     if get_logged_in(request, user_table):
-        return redirect('/', 302, None)
+        return redirect('/', 400, "Bad Request")
     return render_template('sign.html')
 
 
 @app.route('/signup', methods=["POST"])  # Handles sign-in requests
 def signup():
     if get_logged_in(request, user_table):
-        return redirect('/', 302, None)
+        return redirect('/', 400, "Bad Request")
     username = request.form.get("register_username")
     password = request.form.get("register_password")
     email = request.form.get("register_email")
@@ -78,20 +81,20 @@ def signup():
         return render_template('home.html')
     else:
         flash("Email or username already in use!")
-        return redirect(request.referrer, 302, None)
+        return redirect(request.referrer, 400, "Bad Request")
 
 
 @app.route('/login', methods=["POST"])  # Login handler
 def login():
     if get_logged_in(request, user_table):
-        return redirect('/', 302, None)
+        return redirect('/', 400, "Bad Request")
     email = request.form.get("login_email")
     password = request.form.get("login_password")
     # Checking if the user is actually registered to us
     user = user_table.find_one({"email": email})
     if user is None:
         flash("Invalid credentials!")
-        return redirect("/", 302, None)
+        return redirect("/", 403, "Forbidden")
     else:
         # Then we authenticate their password
         hashed = user["pass"]
@@ -101,14 +104,14 @@ def login():
             user_table.update_one({"email": email}, {"$set": {"token": hashed_token}})
             xsrf_token = secrets.token_urlsafe()
             user_table.update_one({"email": email}, {"$set": {"xsrf_tokens": xsrf_token}})
-            response = make_response(redirect("/", 302, None))  # FILL THIS OUT TO LEAD TO THE FIRST PAGE
+            response = make_response(redirect("/", 200, "OK"))
             response.set_cookie('auth_token', value=auth_token, httponly=True, max_age=604800)
             response.set_cookie('email', value=email, httponly=True, max_age=604800)
             return response
 
         else:
             flash("Invalid credentials!")
-            return redirect("/", 302, None)
+            return redirect("/", 403, "Forbidden")
 
 
 @app.route('/logout', methods=["POST"])
@@ -123,7 +126,7 @@ def logout():
         response.set_cookie('email', value="", httponly=True, max_age=0)
         return response
     else:
-        return redirect("/", 302, None)
+        return redirect("/", 400, "Bad Request")
 
 
 if __name__ == "__main__":
