@@ -6,6 +6,13 @@
 
 
 {% block body %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <script>alert("{{ message }}");</script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 <div class="user_forms-login">
         <h2 class="forms_title">Login</h2>
         <form class="forms_form" id="login_form" method="post" action="/login">
@@ -18,7 +25,6 @@
             </div>
           </fieldset>
           <div class="forms_buttons">
-            <button type="button" class="forms_buttons-forgot">Forgot password?</button>
             <input type="submit" value="Log In" class="forms_buttons-action">
           </div>
         </form>

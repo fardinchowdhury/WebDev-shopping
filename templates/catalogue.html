@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>UpBid</title>
+  <link href="../static/style.css" rel="stylesheet" type="text/css" />
+  <link href="../static/signup.css" rel="stylesheet" type="text/css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<!-- The 'listings' variable holds a list of all the items currently for sale (still in dictionary form). If the item
+was posted by the currently logged-in user, it will also display a button next to the item to delete it. The username of
+the current user is stored in 'username', and is verified via authentication token (the get_logged_in method).
+-->
+<body>
+{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <script>alert("{{ message }}");</script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+<div class="user_forms-login">
+        <h2 class="forms_title">List item for sale</h2>
+        <form class="forms_form" id="add_item" method="post" action="/add_item" enctype="multipart/form-data">
+          <fieldset class="forms_fieldset">
+            <div class="forms_field">
+              <input type="text" placeholder="Name of Item" name="item_name" class="forms_field-input" required />
+            </div>
+              <div class="forms_field">
+              <input type="text" placeholder="Item Description" name="item_description" class="forms_field-input" required />
+            </div>
+            <div class="forms_field">
+              <input type="number" placeholder="Price" name="item_price" class="forms_field-input" required />
+            </div>
+              <div class="forms_field">
+              <input type="file" placeholder="Image of item" name="item_image" class="forms_field-input" required />
+            </div>
+              <div class="forms_field">
+              <input type="text" hidden name="xsrf_token" value="{{ xsrf_token }}"  />
+            </div>
+            <div class="forms_buttons">
+                <input type="submit" value="Add item" class="forms_buttons-action" required>
+            </div>
+          </fieldset>
+
+        </form>
+      </div>
+
+
+
+{% if listings is none %}
+<p>No items available for sale!</p>
+{% endif %}
+
+
+</body>
+
+</html>

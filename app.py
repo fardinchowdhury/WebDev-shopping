@@ -13,11 +13,38 @@ database = mongo_client["Site_Info"]
 user_table = database["users"]  # Table for user info (usernames, etc.)
 current_listings = database["listings"]  # Records for all current items listed on the site
 transaction_records = database["transactions"]  # Holds a record of all previous finished transactions
-
+item_ids = database["ids"]
 
 @app.route('/')  # Serving home page and associated content
 def home():
-    if get_logged_in(request, user_table): return render_template('item.html', error=None)
+    if get_logged_in(request, user_table):
+        # NOTE: We still need to load the current items on sale and the XSRF token here -JG
+        current_user = get_logged_in(request, user_table)
+        current_xsrf = current_user["xsrf_tokens"]
+        return render_template('catalogue.html', listings=None, error=None, xsrf_token=current_xsrf)
+    return render_template('home.html', error=None)
+
+
+@app.route('/add_item')
+def add_item():
+    if get_logged_in(request, user_table):
+
+        item_xsrf = request.form.get("xsrf_token")
+        current_user = get_logged_in(request, user_table)
+        current_xsrf = current_user["xsrf_tokens"]
+
+        if item_xsrf == current_xsrf:
+
+            name = request.form.get("item_name")
+            description = request.form.get("item_description")
+            price = request.form.get("item_price")
+            image = request.form.get("item_image")
+            new_id = get_item_id(item_ids)
+
+
+        flash("Cross site request forgery detected!")
+        return render_template('home.html', error=None)
+
     return render_template('home.html', error=None)
 
 
@@ -70,9 +97,11 @@ def login():
         hashed = user["pass"]
         if bcrypt.checkpw(password.encode(), hashed):
             auth_token = secrets.token_urlsafe()
-            hashed_token = bcrypt.hashpw(auth_token.encode(), bcrypt.gensalt(1))
+            hashed_token = bcrypt.hashpw(auth_token.encode(), bcrypt.gensalt())
             user_table.update_one({"email": email}, {"$set": {"token": hashed_token}})
-            response = make_response(render_template())  # FILL THIS OUT TO LEAD TO THE FIRST PAGE
+            xsrf_token = secrets.token_urlsafe()
+            user_table.update_one({"email": email}, {"$set": {"xsrf_tokens": xsrf_token}})
+            response = make_response(redirect("/", 302, None))  # FILL THIS OUT TO LEAD TO THE FIRST PAGE
             response.set_cookie('auth_token', value=auth_token, httponly=True, max_age=604800)
             response.set_cookie('email', value=email, httponly=True, max_age=604800)
             return response
@@ -86,7 +115,10 @@ def login():
 def logout():
     if get_logged_in(request, user_table):
         # Help with deleting cookies from https://sparkdatabox.com/tutorials/python-flask/delete-cookies
-        response = make_response(render_template('home.html', error=None))  # FILL THIS OUT TO LEAD TO THE LOGIN PAGE
+        email = request.cookies["email"]
+        user_table.update_one({"email": email}, {"$set": {"token": None}})
+        user_table.update_one({"email": email}, {"$set": {"xsrf_tokens": None}})
+        response = make_response(render_template('home.html', error=None))
         response.set_cookie('auth_token', value="", httponly=True, max_age=0)
         response.set_cookie('email', value="", httponly=True, max_age=0)
         return response
