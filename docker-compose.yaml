@@ -1,0 +1,15 @@
+# Following the example of https://medium.com/analytics-vidhya/docker-docker-compose-flask-app-8527356aacd5 -JG
+version: '3'
+
+services:
+  nginx:
+    build: ./nginx/
+    ports: 
+      - '80:80'
+      - '443:443'
+  mongo:
+    image: mongo:4.2.5
+  web:
+    build: .
+    ports:
+      - '5000:5000'
