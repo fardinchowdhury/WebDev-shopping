@@ -83,7 +83,21 @@
     clear: both;
     display: table;
   }
-  
+
+  #item_image {
+    height: 100px;
+    width: 100px;
+  }
+
+  #item_in_list {
+    padding-bottom: 10px;
+  }
+
+  #paragraph_in_list {
+    padding-bottom: 3px;
+    color: black;
+  }
+
   .section {
     position: relative;
     height: 500px;

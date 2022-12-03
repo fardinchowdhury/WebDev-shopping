@@ -52,10 +52,36 @@ the current user is stored in 'username', and is verified via authentication tok
       </div>
 
 
+<!-- Code for formatting here taken from https://jinja.palletsprojects.com/en/3.1.x/templates/ -->
+<ul style="padding-left:10px; padding-top:10px">
+    {% for item in listings  %}
+        <li id="item_in_list">
+        <p id="paragraph_in_list">{{ item["name"] }} | {{ item["seller"] }}</p>
+        <p id="paragraph_in_list">{{ item["description"] }}</p>
+        <p id="paragraph_in_list">{{ item["price"] }}</p>
+        <img id="item_image" src={{ "/image/" + item["id"]|string }} />
+        {% if user == item["seller"]%}
+            <form class="forms_form" id="delete_item" method="post" action="/delete_item" enctype="multipart/form-data">
+                <input type="text" hidden name="item_id" value={{ item["id"]|string }}  />
+                <input type="text" hidden name="xsrf_token" value="{{ xsrf_token }}"  />
+                <input type="submit" value="Delete Item" class="forms_buttons-action" required>
+            </form>
 
-{% if listings is none %}
-<p>No items available for sale!</p>
-{% endif %}
+        {% endif %}
+        {% if user != item["seller"]%}
+            <form class="forms_form" id="cart_item" method="post" action="/add_to_cart" enctype="multipart/form-data">
+                <input type="text" hidden name="item_id" value={{ item["id"]|string }}  />
+                <input type="text" hidden name="xsrf_token" value="{{ xsrf_token }}"  />
+                <input type="submit" value="Add item to cart" class="forms_buttons-action" required>
+            </form>
+
+        {% endif %}
+        </li>
+    {% else %}
+       <p>No items available for sale!</p>
+    {% endfor %}
+
+</ul>
 
 
 </body>

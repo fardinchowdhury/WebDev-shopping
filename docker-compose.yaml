@@ -1,6 +1,8 @@
 # Following the example of https://medium.com/analytics-vidhya/docker-docker-compose-flask-app-8527356aacd5 -JG
 version: '3'
 
+
+
 services:
   mongo:
     image: mongo:4.2.5
