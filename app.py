@@ -3,7 +3,8 @@ import pymongo
 import bcrypt
 import os
 from helper_functions import *
-from flask import Flask, render_template, url_for, request, flash, redirect, make_response, send_file, send_from_directory
+from flask import Flask, render_template, url_for, request, flash, redirect, make_response, send_file, \
+    send_from_directory
 from werkzeug.utils import secure_filename
 
 # Assistance with file uploads couresty of https://flask.palletsprojects.com/en/2.2.x/patterns/fileuploads/ -JG
@@ -40,9 +41,9 @@ def home():
                                user=current_user["user"])
     return render_template('home.html', error=None)
 
+
 @app.route('/add_to_cart', methods=["POST"])
 def add_to_cart():
-
     if get_logged_in(request, user_table):
 
         current_user = get_logged_in(request, user_table)
@@ -54,6 +55,9 @@ def add_to_cart():
 
             item = current_listings.find_one({"id": int(item_id)})
             if current_user["user"] != item["seller"]:
+                current_cart = current_user["cart"]
+                current_cart.append(int(item_id))
+                user_table.update_one({"user": current_user["user"]}, {"$set": {"cart": current_cart}})
 
                 return redirect("/", 302, "Found")
 
@@ -63,9 +67,34 @@ def add_to_cart():
 
     return redirect("/", 302, "Access Forbidden")
 
+
+@app.route('/remove_from_cart', methods=["POST"])
+def remove_from_cart():
+    if get_logged_in(request, user_table):
+
+        current_user = get_logged_in(request, user_table)
+        item_xsrf = request.form.get("xsrf_token")
+        item_id = request.form.get("item_id")
+        current_xsrf = current_user["xsrf_tokens"]
+
+        if item_xsrf == current_xsrf:
+
+            if int(item_id) in current_user["cart"]:
+                current_cart = current_user["cart"]
+                current_cart.remove(int(item_id))
+                user_table.update_one({"user": current_user["user"]}, {"$set": {"cart": current_cart}})
+
+                return redirect("/", 302, "Found")
+
+            return redirect("/", 302, "Invalid request")
+
+        return redirect("/", 302, "Access Forbidden")
+
+    return redirect("/", 302, "Access Forbidden")
+
+
 @app.route('/delete_item', methods=["POST"])
 def delete_item():
-
     if get_logged_in(request, user_table):
 
         current_user = get_logged_in(request, user_table)
@@ -82,10 +111,8 @@ def delete_item():
     return redirect("/", 302, "Access Forbidden")
 
 
-
 @app.route('/add_item', methods=["POST"])
 def add_item():
-
     if get_logged_in(request, user_table):
 
         if 'item_image' not in request.files:
@@ -115,7 +142,6 @@ def add_item():
             new_id = get_item_id(item_ids)
 
             if current_listings.count_documents({"name": name}) > 0:
-
                 flash("Item name already taken!")
                 return redirect("/", 302, "Found")
 
@@ -157,7 +183,7 @@ def signup():
     if not check_for_user(username, email, user_table):
         print("Creating user!", flush=True)
         hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
-        user_table.insert_one({"user": username, "email": email, "pass": hashed_password})
+        user_table.insert_one({"user": username, "email": email, "pass": hashed_password, "cart": []})
         flash("Signup successful!")
         return render_template('home.html')
     else:

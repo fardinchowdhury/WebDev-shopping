@@ -68,4 +68,7 @@ def get_logged_in(request, user_database):
 
         return None
 
-def add_to_cart(username, current_transactions):
+
+
+
+
