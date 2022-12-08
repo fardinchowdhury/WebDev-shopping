@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>User Profile</title>
+  <link href="../static/style.css" rel="stylesheet" type="text/css" />
+  <link href="../static/signup.css" rel="stylesheet" type="text/css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<header>
+    <img class="logo" src="static/logo.png" alt="logo">
+
+
+    <nav>
+      <ul class="nav_links">
+
+        <li><a href="/"> Catalogue </a></li>
+         <li><a href="/profile"> Profile </a></li>
+        <a class="cta" href="/logout"><button class="btn1">Logout</button></a>
+      </ul>
+    </nav>
+</header>
+    <h2>{{ user["user"] }}</h2>
+    <h3>{{ user["email"] }}</h3>
+
+
+</body>
+</html>

@@ -83,3 +83,15 @@ def update_users_items(user_table, bought_items):
             current_sold.append(item)
         user_table.update_one({"user": current_user}, {"$set": {"items":current_items,"sold_items":current_sold}})
     return None
+
+
+def add_to_transactions(transaction_table, listings_table, bought_items, buyer):
+    listings = listings_table.find({"id": {"$in": bought_items}})
+    for listing in listings:
+        id = listing["id"]
+        seller = listing["seller"]
+        name = listing["name"]
+        description = listing["description"]
+        image = listing["image"]
+        transaction_table.insert_one({"id": id, "buyer": buyer, "name": name, "seller": seller, "description": description, "image":image})
+    return None

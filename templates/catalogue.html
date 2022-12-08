@@ -17,6 +17,20 @@ was posted by the currently logged-in user, it will also display a button next t
 the current user is stored in 'username', and is verified via authentication token (the get_logged_in method).
 -->
 <body>
+<header>
+    <img class="logo" src="static/logo.png" alt="logo">
+
+
+    <nav>
+      <ul class="nav_links">
+
+        <li><a href="/"> Catalogue </a></li>
+          <li><a href="/profile"> Profile </a></li>
+        <a class="cta" href="/logout"><button class="btn1">Logout</button></a>
+      </ul>
+    </nav>
+
+  </header>
 {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}

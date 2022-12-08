@@ -6,6 +6,7 @@ from helper_functions import *
 from flask import Flask, render_template, url_for, request, flash, redirect, make_response, send_file, \
     send_from_directory
 from werkzeug.utils import secure_filename
+from flask_socketio import SocketIO
 
 # Assistance with file uploads couresty of https://flask.palletsprojects.com/en/2.2.x/patterns/fileuploads/ -JG
 
@@ -21,6 +22,7 @@ def allowed_file(filename):
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = int.to_bytes(3, secrets.randbits(24), byteorder="big")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+socketio = SocketIO(app)
 
 # Database pointers
 mongo_client = pymongo.MongoClient('mongo')
@@ -40,6 +42,24 @@ def home():
         return render_template('catalogue.html', listings=items, error=None, xsrf_token=current_xsrf,
                                user=current_user["user"], cart=current_user["cart"])
     return render_template('home.html', error=None)
+
+@app.route('/profile', methods=["GET"])
+def profile():
+    if get_logged_in(request, user_table):
+        current_user = get_logged_in(request, user_table)
+
+        items = current_user["items"]
+        bought_items = current_user["bought_items"]
+        sold_items = current_user["sold_items"]
+
+        item_list = current_listings.find({"id": {"$in": items}})
+        bought_list = transaction_records.find({"id": {"$in":bought_items}})
+        sold_list = transaction_records.find({"id": {"$in":sold_items}})
+
+        return render_template('profile.html', error=None, items=item_list, bought=bought_list, sold=sold_list, user=current_user)
+        # Need to finish the template above
+    return render_template('home.html', error=None)
+
 
 
 @app.route('/add_to_cart', methods=["POST"])
@@ -62,7 +82,6 @@ def add_to_cart():
                 else:
                     current_cart.append(int(item_id))
                 user_table.update_one({"user": current_user["user"]}, {"$set": {"cart": current_cart}})
-                flash("Item added to cart")
                 return redirect("/", 302, "Found")
 
             return redirect("/", 302, "Invalid request")
@@ -107,6 +126,7 @@ def checkout():
             bought_items = current_user["cart"]
             current_items = current_user["bought_items"]
             current_items = bought_items + current_items
+            add_to_transactions(transaction_records, current_listings, bought_items, current_user["user"])
             user_table.update_one({"user": current_user["user"]}, {"$set": {"bought_items": current_items, "cart": []}})
             user_table.update_many({"cart": {"$in": bought_items}}, {"$pull": {"cart": {"$in": bought_items}}})
             update_users_items(user_table, bought_items)
@@ -264,14 +284,14 @@ def login():
             return redirect("/", 302, "Forbidden")
 
 
-@app.route('/logout', methods=["POST"])
+@app.route('/logout', methods=["GET"])
 def logout():
     if get_logged_in(request, user_table):
         # Help with deleting cookies from https://sparkdatabox.com/tutorials/python-flask/delete-cookies
         email = request.cookies["email"]
         user_table.update_one({"email": email}, {"$set": {"token": None}})
         user_table.update_one({"email": email}, {"$set": {"xsrf_tokens": None}})
-        response = make_response(render_template('home.html', error=None))
+        response = make_response(redirect("/", 302, "Found"))
         response.set_cookie('auth_token', value="", httponly=True, max_age=0)
         response.set_cookie('email', value="", httponly=True, max_age=0)
         return response
@@ -292,4 +312,4 @@ def load_image(image_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+    socketio.run(app, debug=True, host='0.0.0.0')
