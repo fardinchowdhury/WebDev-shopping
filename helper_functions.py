@@ -1,5 +1,6 @@
 import pymongo
 import bcrypt
+import numpy
 
 
 # Checks if a user is already in our database. Returns false if not, true if he is
@@ -69,6 +70,16 @@ def get_logged_in(request, user_database):
         return None
 
 
-
-
-
+def update_users_items(user_table, bought_items):
+    users_to_update = user_table.find({"items": {"$in": bought_items}})
+    for user in users_to_update:
+        current_user = user["user"]
+        current_items = user["items"]
+        current_sold = user["sold_items"]
+        # With help from https://stackoverflow.com/questions/65605535/how-can-i-find-matching-elements-and-indices-from-two-arrays
+        items_to_remove = numpy.intersect1d(current_items, bought_items)
+        for item in items_to_remove:
+            current_items.remove(item)
+            current_sold.append(item)
+        user_table.update_one({"user": current_user}, {"$set": {"items":current_items,"sold_items":current_sold}})
+    return None

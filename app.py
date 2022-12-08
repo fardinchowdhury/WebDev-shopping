@@ -38,7 +38,7 @@ def home():
         current_xsrf = current_user["xsrf_tokens"]
         items = current_listings.find({})
         return render_template('catalogue.html', listings=items, error=None, xsrf_token=current_xsrf,
-                               user=current_user["user"])
+                               user=current_user["user"], cart=current_user["cart"])
     return render_template('home.html', error=None)
 
 
@@ -56,9 +56,13 @@ def add_to_cart():
             item = current_listings.find_one({"id": int(item_id)})
             if current_user["user"] != item["seller"]:
                 current_cart = current_user["cart"]
-                current_cart.append(int(item_id))
-                user_table.update_one({"user": current_user["user"]}, {"$set": {"cart": current_cart}})
+                if type(current_cart) == type(None):
 
+                    current_cart = [int(item_id)]
+                else:
+                    current_cart.append(int(item_id))
+                user_table.update_one({"user": current_user["user"]}, {"$set": {"cart": current_cart}})
+                flash("Item added to cart")
                 return redirect("/", 302, "Found")
 
             return redirect("/", 302, "Invalid request")
@@ -90,7 +94,30 @@ def remove_from_cart():
 
         return redirect("/", 302, "Access Forbidden")
 
-    return redirect("/", 302, "Access Forbidden")
+    return redirect("/", 302, "Invalid Request")
+
+
+@app.route('/checkout', methods=["POST"])
+def checkout():
+    if get_logged_in(request, user_table):
+        current_user = get_logged_in(request, user_table)
+        item_xsrf = request.form.get("xsrf_token")
+        current_xsrf = current_user["xsrf_tokens"]
+        if item_xsrf == current_xsrf:
+            bought_items = current_user["cart"]
+            current_items = current_user["bought_items"]
+            current_items = bought_items + current_items
+            user_table.update_one({"user": current_user["user"]}, {"$set": {"bought_items": current_items, "cart": []}})
+            user_table.update_many({"cart": {"$in": bought_items}}, {"$pull": {"cart": {"$in": bought_items}}})
+            update_users_items(user_table, bought_items)
+            current_listings.delete_many({"id": {"$in": bought_items}})
+
+            # Handle the owners of the items having it removed from their listed items and put into their sold items
+            flash("Order processed successfully")
+            return redirect("/", 302, "Found")
+        return redirect("/", 302, "Access Forbidden")
+
+    return redirect("/", 302, "Invalid Request")
 
 
 @app.route('/delete_item', methods=["POST"])
@@ -104,11 +131,15 @@ def delete_item():
 
         if item_xsrf == current_xsrf:
             current_listings.delete_one({"id": int(item_id)})
+            current_items = current_user["items"]
+            current_items.remove(int(item_id))
+            user_table.update_one({"user": current_user["user"]}, {"$set": {"items": current_items}})
+            user_table.update_many({"cart": int(item_id)}, {"$pull": {"cart": int(item_id)}})
             return redirect("/", 302, "Found")
 
         return redirect("/", 302, "Access Forbidden")
 
-    return redirect("/", 302, "Access Forbidden")
+    return redirect("/", 302, "Invalid Request")
 
 
 @app.route('/add_item', methods=["POST"])
@@ -140,7 +171,7 @@ def add_item():
                 return render_template('home.html', error=None)
 
             new_id = get_item_id(item_ids)
-
+            print("New ID is: " + str(new_id), flush=True)
             if current_listings.count_documents({"name": name}) > 0:
                 flash("Item name already taken!")
                 return redirect("/", 302, "Found")
@@ -149,6 +180,16 @@ def add_item():
                 {"id": new_id, "seller": current_user["user"], "name": name, "description": description,
                  "image": filename,
                  "price": price})
+
+            current_items = current_user["items"]
+            print(current_items, flush=True)
+            if type(current_items) == type(None):
+                print("IT'S INSIDE THE CURRENT ITEMS CHECK", flush=True)
+                current_items = [new_id]
+            else:
+                current_items.append(new_id)
+            print(current_items, flush=True)
+            user_table.update_one({"user": current_user["user"]}, {"$set": {"items": current_items}})
 
             return redirect("/", 302, "Found")
 
@@ -183,7 +224,9 @@ def signup():
     if not check_for_user(username, email, user_table):
         print("Creating user!", flush=True)
         hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
-        user_table.insert_one({"user": username, "email": email, "pass": hashed_password, "cart": []})
+        user_table.insert_one(
+            {"user": username, "email": email, "pass": hashed_password, "cart": [], "token": None, "xsrf_tokens": None,
+             "bought_items": [], "sold_items": [], "items": []})
         flash("Signup successful!")
         return render_template('home.html')
     else:

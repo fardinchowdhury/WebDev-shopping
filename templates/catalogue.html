@@ -69,12 +69,20 @@ the current user is stored in 'username', and is verified via authentication tok
 
         {% endif %}
         {% if user != item["seller"]%}
+            {% if item["id"] in cart %}
+             <form class="forms_form" id="cart_item" method="post" action="/remove_from_cart" enctype="multipart/form-data">
+                <input type="text" hidden name="item_id" value={{ item["id"]|string }}  />
+                <input type="text" hidden name="xsrf_token" value="{{ xsrf_token }}"  />
+                <input type="submit" value="Remove item from cart" class="forms_buttons-action" required>
+            </form>
+
+        {% else %}
             <form class="forms_form" id="cart_item" method="post" action="/add_to_cart" enctype="multipart/form-data">
                 <input type="text" hidden name="item_id" value={{ item["id"]|string }}  />
                 <input type="text" hidden name="xsrf_token" value="{{ xsrf_token }}"  />
                 <input type="submit" value="Add item to cart" class="forms_buttons-action" required>
             </form>
-
+            {% endif %}
         {% endif %}
         </li>
     {% else %}
