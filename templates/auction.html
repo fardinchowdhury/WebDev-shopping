@@ -3,15 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <title>Auction</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
-    <script type="text/javascript" charset="utf-8">
-    var socket = io();
-    socket.on('connect', function() {
-        socket.emit('my event', {data: 'I\'m connected!'});
-    });
-</script>
+
 </head>
 <body>
+<header>
+    <img class="logo" src="static/logo.png" alt="logo">
+
+
+    <nav>
+      <ul class="nav_links">
+
+          <li><a href="/"> Catalogue </a></li>
+          <li><a href="/auction"> Auction </a></li>
+          <li><a href="/profile"> Profile </a></li>
+        <a class="cta" href="/logout"><button class="btn1">Logout</button></a>
+      </ul>
+    </nav>
+
+  </header>
+{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <script>alert("{{ message }}");</script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+<h3>Make auction</h3>
+<form class="forms_form" id="add_item" method="post" action="/add_item" enctype="multipart/form-data">
+          <fieldset class="forms_fieldset">
+            <div class="forms_field">
+              <input type="text" placeholder="Name of Item" name="item_name" class="forms_field-input" required />
+            </div>
+              <div class="forms_field">
+              <input type="text" placeholder="Item Description" name="item_description" class="forms_field-input" required />
+            </div>
+            <div class="forms_field">
+              <input type="number" placeholder="Starting price" name="item_price" class="forms_field-input" required />
+            </div>
+              <div class="forms_field">
+              <input type="file" placeholder="Image of item" name="item_image" class="forms_field-input" required />
+            </div>
+              <div class="forms_field">
+              <input type="text" hidden name="xsrf_token" value="{{ xsrf_token }}"  />
+            </div>
+              <!-- With help from https://stackoverflow.com/questions/32777184/html-input-for-positive-whole-numbers-only-type-number -->
+              <div class="forms_field">
+                  <input type="number" placeholder="Auction time in minutes"  min="0" step="1" name="item_time" class="forms_field-input" required />
+              </div>
+            <div class="forms_buttons">
+                <input type="submit" value="Create auction" class="forms_buttons-action" required>
+            </div>
+          </fieldset>
+
+        </form>
+<br>
+<h4>Auctions</h4>
+<br>
+<ul style="padding-left:10px; padding-top:10px">
+{% for auction in auctions %}
+     <li id="item_in_list">
+        <p id="paragraph_in_list">{{ auction["name"] }} | {{ auction["seller"] }}</p>
+        <p id="paragraph_in_list">{{ auction["description"] }}</p>
+        <p id="paragraph_in_list">{{ auction["price"] }}</p>
+
+
+     </li>
+
+
+{% else %}
+    <p>No auctions to list!</p>
+
+{% endfor %}
+</ul>
 
 </body>
 </html>

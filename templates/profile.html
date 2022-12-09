@@ -20,13 +20,65 @@
       <ul class="nav_links">
 
         <li><a href="/"> Catalogue </a></li>
+          <li><a href="/auction"> Auction </a></li>
          <li><a href="/profile"> Profile </a></li>
         <a class="cta" href="/logout"><button class="btn1">Logout</button></a>
       </ul>
     </nav>
 </header>
-    <h2>{{ user["user"] }}</h2>
-    <h3>{{ user["email"] }}</h3>
+<h2 style="padding-left:10px">{{ user["user"] }}</h2>
+<h3 style="padding-left:10px">{{ user["email"] }}</h3>
+<br>
+<div style="display:flex;padding-left:10px">
+    <div style="flex:33%">
+        <h4>Currently listed items</h4>
+    <br>
+        {% for item in items %}
+            <h4>{{ item["name"] }}</h4>
+            <p>{{ item["description"] }}</p>
+            <img id="item_image" src={{ "/image/" + item["id"]|string }} />
+            <br>
+
+
+        {% else %}
+            <p>No items to list!</p>
+        {% endfor %}
+
+    </div>
+    <div style="flex:33%">
+        <h4>Bought items</h4>
+    <br>
+        {% for item in bought %}
+            <h4>{{ item["name"] }}</h4>
+            <h5>{{ item["seller"] }}</h5>
+            <p>{{ item["description"] }}</p>
+            <br>
+
+        {% else %}
+            <p>No items to list!</p>
+        {% endfor %}
+
+    </div>
+    <div style="flex:33%">
+        <h4>Sold Items</h4>
+    <br>
+        {% for item in sold %}
+            <h4>{{ item["name"] }}</h4>
+            <h5>{{ item["buyer"] }}</h5>
+            <p>{{ item["description"] }}</p>
+            <br>
+
+
+        {% else %}
+            <p>No items to list!</p>
+        {% endfor %}
+
+    </div>
+
+
+</div>
+
+
 
 
 </body>

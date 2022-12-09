@@ -6,7 +6,8 @@ from helper_functions import *
 from flask import Flask, render_template, url_for, request, flash, redirect, make_response, send_file, \
     send_from_directory
 from werkzeug.utils import secure_filename
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
+from datetime import datetime, timedelta
 
 # Assistance with file uploads couresty of https://flask.palletsprojects.com/en/2.2.x/patterns/fileuploads/ -JG
 
@@ -31,6 +32,7 @@ user_table = database["users"]  # Table for user info (usernames, etc.)
 current_listings = database["listings"]  # Records for all current items listed on the site
 transaction_records = database["transactions"]  # Holds a record of all previous finished transactions
 item_ids = database["ids"]
+auctions_listings = database["auctions"]
 
 
 @app.route('/')  # Serving home page and associated content
@@ -38,7 +40,7 @@ def home():
     if get_logged_in(request, user_table):
         current_user = get_logged_in(request, user_table)
         current_xsrf = current_user["xsrf_tokens"]
-        items = current_listings.find({})
+        items = current_listings.find({"auction":False})
         return render_template('catalogue.html', listings=items, error=None, xsrf_token=current_xsrf,
                                user=current_user["user"], cart=current_user["cart"])
     return render_template('home.html', error=None)
@@ -49,6 +51,7 @@ def profile():
         current_user = get_logged_in(request, user_table)
 
         items = current_user["items"]
+        print(items, flush=True)
         bought_items = current_user["bought_items"]
         sold_items = current_user["sold_items"]
 
@@ -195,11 +198,18 @@ def add_item():
             if current_listings.count_documents({"name": name}) > 0:
                 flash("Item name already taken!")
                 return redirect("/", 302, "Found")
-
-            current_listings.insert_one(
-                {"id": new_id, "seller": current_user["user"], "name": name, "description": description,
-                 "image": filename,
-                 "price": price})
+            if "item_time" in request.form:
+                current_listings.insert_one(
+                    {"id": new_id, "seller": current_user["user"], "name": name, "description": description,
+                     "image": filename,
+                     "price": price, "auction": True})
+                time = datetime.now() + timedelta(minutes=int(request.form.get("item_time")))
+                auctions_listings.insert_one({"seller":current_user["user"], "id":new_id, "description":description, "name": name, "time":time})
+            else:
+                current_listings.insert_one(
+                    {"id": new_id, "seller": current_user["user"], "name": name, "description": description,
+                    "image": filename,
+                    "price": price, "auction":False})
 
             current_items = current_user["items"]
             print(current_items, flush=True)
@@ -211,6 +221,8 @@ def add_item():
             print(current_items, flush=True)
             user_table.update_one({"user": current_user["user"]}, {"$set": {"items": current_items}})
 
+            if "item_time" in request.form:
+                return redirect("/auction", 302, "Found")
             return redirect("/", 302, "Found")
 
         flash("Cross site request forgery detected!")
@@ -232,6 +244,14 @@ def signup_page():
         return redirect('/', 302, "Bad Request")
     return render_template('sign.html')
 
+@app.route('/auction')
+def auction_page():
+    if get_logged_in(request, user_table):
+        current_user = get_logged_in(request, user_table)
+        current_xsrf = current_user["xsrf_tokens"]
+        auctions = auctions_listings.find({})
+        return render_template('auction.html', auctions=auctions, user=current_user, xsrf_token=current_xsrf)
+    return redirect('/', 302, "Access Denied")
 
 @app.route('/signup', methods=["POST"])  # Handles sign-in requests
 def signup():
