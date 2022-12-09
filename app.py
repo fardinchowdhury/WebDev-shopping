@@ -119,6 +119,18 @@ def remove_from_cart():
     return redirect("/", 302, "Invalid Request")
 
 
+@app.route('/cart', methods=["GET"])
+def cart():
+    if get_logged_in(request,user_table):
+        current_user = get_logged_in(request, user_table)
+        cart_items = current_user["cart"]
+        cart_items = current_listings.find({"id": {"$in": cart_items}})
+        current_xsrf = current_user["xsrf_tokens"]
+        items_length = len(list(cart_items))
+        print(items_length, flush=True)
+        return render_template("cart.html", error=None, items=cart_items, items_length=items_length, user = current_user, xsrf_token=current_xsrf)
+    return redirect("/", 302, "Invalid Request")
+
 @app.route('/checkout', methods=["POST"])
 def checkout():
     if get_logged_in(request, user_table):

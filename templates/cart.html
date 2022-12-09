@@ -1,46 +1,59 @@
-{% extends 'base.html' %}
-
-{% block head %}
-<title>Sign Up</title>
-{% endblock %}
-
-
-{% block body %}
-<div class = "content">
-
-    <h1 style ="text-align: center">Test shoppingcart</h1>
-            {% for task in tasks%} 
-            <table>
-                <tr>
-                    <th>Seller</th>
-                    <th>Itemname</th>
-                    <th>Image</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                </tr>
-                <tr>
-                <form enctype="multipart/form-data">
-                    <td>{{ task.seller }}</td>
-                    <td>{{ task.Item_name }}</td>
-                    <td><img src = '/image/{{ task.profile_image_name }}' class = 'image' width="100" height="100"/></td>
-                    <td>{{ task.Description }}</td>
-                    <td>{{ task.Price }}</td>
-                </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>User Profile</title>
+  <link href="../static/style.css" rel="stylesheet" type="text/css" />
+  <link href="../static/signup.css" rel="stylesheet" type="text/css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<header>
+    <img class="logo" src="static/logo.png" alt="logo">
 
 
-                <form action="/item-delete" id= "update-form" method="post" enctype="multipart/form-data">
-                    <label for="form-user">Which seller:</label>
-                    <input type ="text" name = "seller">
-                    <lbael for="form-item">Which item:</lbael>
-                    <input type ="text" name = "itemname">
-                    <input type = "submit" value="Delete">
-                </form>
-                
-                
-                </tr>
-            </table>
-            {% endfor %}
-            {{pic}}
+    <nav>
+      <ul class="nav_links">
 
-</div>
-{% endblock %}
+        <li><a href="/"> Catalogue </a></li>
+          <li><a href="/auction"> Auction </a></li>
+         <li><a href="/profile"> Profile </a></li>
+          <li><a href="/cart">Cart</a></li>
+        <a class="cta" href="/logout"><button class="btn1">Logout</button></a>
+      </ul>
+    </nav>
+</header>
+<h2>Current cart</h2>
+<br>
+    {% if items_length != 0 %}
+        <form class="forms_form" id="checkout" method="post" action="/checkout" enctype="multipart/form-data">
+
+                <input type="text" hidden name="xsrf_token" value="{{ xsrf_token }}"  />
+                <input type="submit" value="Checkout" class="forms_buttons-action" required>
+            </form>
+    {% endif %}
+<ul style="padding-left:10px; padding-top:10px">
+
+
+    {% for item in items  %}
+        <li id="item_in_list">
+            <p id="paragraph_in_list">{{ item["name"] }} | {{ item["seller"] }}</p>
+        <p id="paragraph_in_list">{{ item["description"] }}</p>
+        <p id="paragraph_in_list">{{ item["price"] }}</p>
+        <img id="item_image" src={{ "/image/" + item["id"]|string }} />
+
+        </li>
+
+    {% else %}
+       <p>Your cart is empty!</p>
+    {% endfor %}
+
+
+
+
+</body>
+</html>
