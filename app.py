@@ -110,7 +110,7 @@ def remove_from_cart():
                 current_cart.remove(int(item_id))
                 user_table.update_one({"user": current_user["user"]}, {"$set": {"cart": current_cart}})
 
-                return redirect("/", 302, "Found")
+                return redirect("/cart", 302, "Found")
 
             return redirect("/", 302, "Invalid request")
 
@@ -127,8 +127,8 @@ def cart():
         cart_items = current_listings.find({"id": {"$in": cart_items}})
         current_xsrf = current_user["xsrf_tokens"]
         items_length = len(list(cart_items))
-        print(str(cart_items), flush=True)
-        print(items_length, flush=True)
+        cart_items = current_user["cart"]
+        cart_items = current_listings.find({"id": {"$in": cart_items}})
         return render_template("cart.html", error=None, items=cart_items, items_length=items_length, user = current_user, xsrf_token=current_xsrf)
     return redirect("/", 302, "Invalid Request")
 

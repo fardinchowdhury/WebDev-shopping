@@ -45,7 +45,11 @@
         <p id="paragraph_in_list">{{ item["description"] }}</p>
         <p id="paragraph_in_list">{{ item["price"] }}</p>
         <img id="item_image" src={{ "/image/" + item["id"]|string }} />
-
+        <form class="forms_form" id="delete_item" method="post" action="/remove_from_cart" enctype="multipart/form-data">
+                <input type="text" hidden name="item_id" value={{ item["id"]|string }}  />
+                <input type="text" hidden name="xsrf_token" value="{{ xsrf_token }}"  />
+                <input type="submit" value="Remove from cart" class="forms_buttons-action" required>
+            </form>
         </li>
 
     {% else %}

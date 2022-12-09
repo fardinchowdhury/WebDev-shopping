@@ -78,6 +78,7 @@ def update_users_items(user_table, bought_items):
         current_sold = user["sold_items"]
         # With help from https://stackoverflow.com/questions/65605535/how-can-i-find-matching-elements-and-indices-from-two-arrays
         items_to_remove = numpy.intersect1d(current_items, bought_items)
+        items_to_remove = items_to_remove.tolist()
         for item in items_to_remove:
             current_items.remove(item)
             current_sold.append(item)
