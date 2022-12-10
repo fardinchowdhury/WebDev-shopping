@@ -16,7 +16,7 @@
         const user = "{{ user["user"]|string }}";
         const auctionID = {{ auction["id"] }};
         const xsrf_token = "{{ user["xsrf_tokens"]|string }}";
-        let socket = io.connect('webdevpro.store:5000');
+        let socket = io();
 
         socket.on('connected', function(){
 
