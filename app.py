@@ -25,7 +25,10 @@ def allowed_file(filename):
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.secret_key = int.to_bytes(3, secrets.randbits(24), byteorder="big")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-socketio = SocketIO(app, cors_allowed_origins=["https://webdevpro.store"])
+
+socketio = SocketIO(app)
+socketio.init_app(app, cors_allowed_origins="https://webdevpro.store")
+
 
 # Database pointers
 mongo_client = pymongo.MongoClient('mongo')
