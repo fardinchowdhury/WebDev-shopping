@@ -1,2 +1,4 @@
 # WebDev-shopping
-This is a full stack website build using frontend and backend libraries.
+An E-commerce site built for CSE 365 in 2022's Fall semester.
+
+Site link: https://webdevpro.store
