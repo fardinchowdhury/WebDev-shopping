@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Auction room</title>
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+</head>
+<!-- Help from https://www.youtube.com/watch?v=RdSrkkrj3l4 -->
+<body id="body">
+
+<script type="text/javascript">
+
+
+    $(document).ready(function() {
+        const user = "{{ user["user"]|string }}";
+        const auctionID = {{ auction["id"] }};
+        const xsrf_token = "{{ user["xsrf_tokens"]|string }}";
+        let socket = io.connect('webdevpro.store');
+
+        socket.on('connected', function(){
+
+            socket.emit('connect_room',{"auction": auctionID })
+            }
+        );
+
+
+        window.onbeforeunload = function(e){
+            socket.emit('remove_from_room',{"auction":auctionID})
+           socket.emit('end');
+        }
+
+        socket.on('price', (data) => {
+            let new_price = data["bid"]
+            document.getElementById("current_bid").innerHTML = new_price.toString()
+
+
+        });
+
+        socket.on('over', (data) => {
+            document.getElementById("body").innerHTML = "<h1>Auction ended.</h1>"
+        })
+
+        $( "#newbid" ).click(function(){
+            if(document.getElementById("new_bid").value != null){
+                socket.emit('new_bid', {"auction":auctionID, "user": user, "xsrf":xsrf_token, "bid": parseInt((document.getElementById("new_bid")).value)})
+            }
+
+        });
+
+
+    });
+</script>
+<h3>Current bid: </h3>
+<h4 id="current_bid">{{ auction["price"]|string }}</h4>
+        <p id="paragraph_in_list">{{ auction["name"] }} | {{ auction["seller"] }}</p>
+        <p id="paragraph_in_list">{{ auction["description"] }}</p>
+        <img style="height: 100px; width: 100px;" id="item_image" src={{ "/image/" + auction["id"]|string }} />
+<br>
+{% if auction["seller"] != user["user"] %}
+<input type="number", id="new_bid">
+<button id="newbid">Post new bid</button>
+{% endif %} }
+</body>
+</html>

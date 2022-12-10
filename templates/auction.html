@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Auction</title>
-
+    <link href="../static/style.css" rel="stylesheet" type="text/css" />
+  <link href="../static/signup.css" rel="stylesheet" type="text/css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
 <header>
@@ -16,6 +21,7 @@
           <li><a href="/"> Catalogue </a></li>
           <li><a href="/auction"> Auction </a></li>
           <li><a href="/profile"> Profile </a></li>
+          <li><a href="/cart">Cart</a></li>
         <a class="cta" href="/logout"><button class="btn1">Logout</button></a>
       </ul>
     </nav>
@@ -62,9 +68,10 @@
 <ul style="padding-left:10px; padding-top:10px">
 {% for auction in auctions %}
      <li id="item_in_list">
-        <p id="paragraph_in_list">{{ auction["name"] }} | {{ auction["seller"] }}</p>
+         <a style="color:blue" href="/auction/{{ auction["id"]|string }}">{{ auction["name"] }} | {{ auction["seller"] }}</a>
         <p id="paragraph_in_list">{{ auction["description"] }}</p>
         <p id="paragraph_in_list">{{ auction["price"] }}</p>
+        <p> Auction closes at {{ auction["time"] }}</p>
 
 
      </li>

@@ -6,8 +6,10 @@ from helper_functions import *
 from flask import Flask, render_template, url_for, request, flash, redirect, make_response, send_file, \
     send_from_directory
 from werkzeug.utils import secure_filename
-from flask_socketio import SocketIO, join_room, leave_room
+from flask_socketio import SocketIO, join_room, leave_room, emit
 from datetime import datetime, timedelta
+from threading import *
+import time
 
 # Assistance with file uploads couresty of https://flask.palletsprojects.com/en/2.2.x/patterns/fileuploads/ -JG
 
@@ -35,15 +37,74 @@ item_ids = database["ids"]
 auctions_listings = database["auctions"]
 
 
+def auctionThread(auctionID, minutes):
+    time.sleep(minutes * 60)
+    end_auction = auctions_listings.find_one({"id":auctionID})
+    auctions_listings.delete_one({"id":auctionID})
+
+
+    seller = end_auction["seller"]
+
+    if(end_auction["bidder"] == None):
+        current_listings.delete_one({"id":auctionID})
+        user_table.update_one({"user":seller}, {"$pull":{"items":auctionID}})
+        return
+    winner = end_auction["bidder"]
+    user_table.update_one({"user":winner}, {"$push": {"bought_items":auctionID}})
+    name = end_auction["name"]
+    description = end_auction["description"]
+    transaction_records.insert_one({"id":auctionID, "buyer":winner, "seller":seller, "name":name, "description":description})
+    current_listings.delete_one({"id": auctionID})
+    user_table.update_one({"user": seller}, {"$pull": {"items": auctionID}})
+    user_table.update_one({"user": seller}, {"$push": {"sold_items": auctionID}})
+    return
+@socketio.on('connect')
+def connectToSocket(data):
+    print("Connection established", flush=True)
+    emit('connected')
+
+@socketio.on('connect_room')
+def connectToRoom(data):
+    auction = data["auction"]
+    join_room(auction)
+    print("Connected to auction room", flush=True)
+    emit('room_connected', {"message": "null"})
+@socketio.on('new_bid')
+def updatePrice(data):
+
+    xsrf_token = data["xsrf"]
+    user = data["user"]
+    current_user = user_table.find_one({"user": user})
+    current_xsrf = current_user["xsrf_tokens"]
+    if xsrf_token == current_xsrf:
+        auction = data["auction"]
+        bid = data["bid"]
+        current_auction = auctions_listings.find_one({"id": auction})
+        current_price = int(current_auction["price"])
+
+        if bid > current_price:
+
+            current_listings.update_one({"id": auction}, {"$set": {"price": bid}})
+            auctions_listings.update_one({"id": auction}, {"$set": {"price": bid, "bidder": user}})
+            emit('price', {"bid": bid}, to=auction)
+
+
+@socketio.on('remove_from_room')
+def disconnect(data):
+    auction = data["auction"]
+    leave_room(auction)
+
+
 @app.route('/')  # Serving home page and associated content
 def home():
     if get_logged_in(request, user_table):
         current_user = get_logged_in(request, user_table)
         current_xsrf = current_user["xsrf_tokens"]
-        items = current_listings.find({"auction":False})
+        items = current_listings.find({"auction": False})
         return render_template('catalogue.html', listings=items, error=None, xsrf_token=current_xsrf,
                                user=current_user["user"], cart=current_user["cart"])
     return render_template('home.html', error=None)
+
 
 @app.route('/profile', methods=["GET"])
 def profile():
@@ -56,13 +117,13 @@ def profile():
         sold_items = current_user["sold_items"]
 
         item_list = current_listings.find({"id": {"$in": items}})
-        bought_list = transaction_records.find({"id": {"$in":bought_items}})
-        sold_list = transaction_records.find({"id": {"$in":sold_items}})
+        bought_list = transaction_records.find({"id": {"$in": bought_items}})
+        sold_list = transaction_records.find({"id": {"$in": sold_items}})
 
-        return render_template('profile.html', error=None, items=item_list, bought=bought_list, sold=sold_list, user=current_user)
+        return render_template('profile.html', error=None, items=item_list, bought=bought_list, sold=sold_list,
+                               user=current_user)
         # Need to finish the template above
     return render_template('home.html', error=None)
-
 
 
 @app.route('/add_to_cart', methods=["POST"])
@@ -121,7 +182,7 @@ def remove_from_cart():
 
 @app.route('/cart', methods=["GET"])
 def cart():
-    if get_logged_in(request,user_table):
+    if get_logged_in(request, user_table):
         current_user = get_logged_in(request, user_table)
         cart_items = current_user["cart"]
         cart_items = current_listings.find({"id": {"$in": cart_items}})
@@ -129,8 +190,10 @@ def cart():
         items_length = len(list(cart_items))
         cart_items = current_user["cart"]
         cart_items = current_listings.find({"id": {"$in": cart_items}})
-        return render_template("cart.html", error=None, items=cart_items, items_length=items_length, user = current_user, xsrf_token=current_xsrf)
+        return render_template("cart.html", error=None, items=cart_items, items_length=items_length, user=current_user,
+                               xsrf_token=current_xsrf)
     return redirect("/", 302, "Invalid Request")
+
 
 @app.route('/checkout', methods=["POST"])
 def checkout():
@@ -217,12 +280,19 @@ def add_item():
                      "image": filename,
                      "price": price, "auction": True})
                 time = datetime.now() + timedelta(minutes=int(request.form.get("item_time")))
-                auctions_listings.insert_one({"seller":current_user["user"], "id":new_id, "description":description, "name": name, "time":time})
+                # https://stackoverflow.com/questions/18470627/how-do-i-remove-the-microseconds-from-a-timedelta-object
+                time = str(time).split(".")[0]
+                auctions_listings.insert_one(
+                    {"seller": current_user["user"], "id": new_id, "description": description, "name": name,
+                     "time": time, "price": price, "bidder": None})
+                minutes = int(request.form.get("item_time"))
+                auction_thread = Thread(target=auctionThread, args=(new_id, minutes))
+                auction_thread.start()
             else:
                 current_listings.insert_one(
                     {"id": new_id, "seller": current_user["user"], "name": name, "description": description,
-                    "image": filename,
-                    "price": price, "auction":False})
+                     "image": filename,
+                     "price": price, "auction": False})
 
             current_items = current_user["items"]
             print(current_items, flush=True)
@@ -257,6 +327,7 @@ def signup_page():
         return redirect('/', 302, "Bad Request")
     return render_template('sign.html')
 
+
 @app.route('/auction')
 def auction_page():
     if get_logged_in(request, user_table):
@@ -265,6 +336,19 @@ def auction_page():
         auctions = auctions_listings.find({})
         return render_template('auction.html', auctions=auctions, user=current_user, xsrf_token=current_xsrf)
     return redirect('/', 302, "Access Denied")
+
+
+@app.route('/auction/<auction_id>')
+def auctionPage(auction_id):
+    if get_logged_in(request, user_table):
+        current_user = get_logged_in(request, user_table)
+        auction_id = int(auction_id)
+        auction = auctions_listings.find_one({"id": auction_id})
+        if auction is None:
+            return redirect("/", 302, "Invalid request")
+        return render_template('auctionpage.html', auction=auction, user=current_user, xsrf_token=current_user["xsrf_tokens"])
+    return redirect("/", 302, "Invalid Request")
+
 
 @app.route('/signup', methods=["POST"])  # Handles sign-in requests
 def signup():
@@ -345,4 +429,4 @@ def load_image(image_id):
 
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, host='0.0.0.0')
+    socketio.run(app, debug=False, host='0.0.0.0')
